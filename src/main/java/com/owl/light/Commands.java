@@ -1,4 +1,4 @@
-package com.owl.udpsockets;
+package com.owl.light;
 
 public enum Commands {
 

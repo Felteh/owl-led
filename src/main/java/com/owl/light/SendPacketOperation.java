@@ -1,7 +1,6 @@
-package com.owl.udpsockets.sup.impl;
+package com.owl.light;
 
-import com.owl.udpsockets.sup.Operation;
-import com.owl.udpsockets.sup.OperationType;
+import com.owl.light.OperationType;
 import java.util.Arrays;
 
 public class SendPacketOperation implements Operation {

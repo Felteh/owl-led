@@ -1,8 +1,9 @@
 package com.owl.udpsockets;
 
-import com.owl.udpsockets.sup.Server;
-import com.owl.udpsockets.sup.impl.OperationListUtils;
+import com.owl.light.LightServer;
+import com.owl.light.OperationListUtils;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 
@@ -13,16 +14,18 @@ public class BasicTest {
 
     @Test
     public void basicTest() throws IOException, InterruptedException, ExecutionException {
-        Server s = new Server(IP_ADDRESS, MAC_ADDRESS);
+        LightServer s = new LightServer(IP_ADDRESS, MAC_ADDRESS);
+        CompletableFuture<Void> fut = s.initialise();
 
-        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-//        s.executeCommand(OperationListUtils.colourMigrate(1, 255));
-//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-//        s.executeCommand(OperationListUtils.colourMigrate(1, 255));
+        CompletableFuture<Void> fin = fut.thenRun(() -> {
+            try {
+                s.executeCommand(OperationListUtils.brightMigrate(1, 27));
+            } catch (IOException | InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        fin.get();
     }
 
 }
