@@ -8,18 +8,21 @@ import org.junit.Test;
 
 public class BasicTest {
 
+    private final String IP_ADDRESS = "192.168.1.70";
+    private final String MAC_ADDRESS = "ac:cf:23:3e:10:56";
+
     @Test
-    public void basicTest() throws IOException, InterruptedException, ExecutionException {       
-        Server s = new Server();
-        
+    public void basicTest() throws IOException, InterruptedException, ExecutionException {
+        Server s = new Server(IP_ADDRESS, MAC_ADDRESS);
+
         s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-        s.executeCommand(OperationListUtils.colourMigrate(1, 255));
-        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
-        s.executeCommand(OperationListUtils.colourMigrate(1, 255));
+//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
+//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
+//        s.executeCommand(OperationListUtils.colourMigrate(1, 255));
+//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
+//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
+//        s.executeCommand(OperationListUtils.brightMigrate(1, 27));
+//        s.executeCommand(OperationListUtils.colourMigrate(1, 255));
     }
 
 }

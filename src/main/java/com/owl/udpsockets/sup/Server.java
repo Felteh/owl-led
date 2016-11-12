@@ -7,16 +7,24 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Server {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+
     private final DatagramSocket socket;
     private final int PORT = 8899;
-    private final String MULTICAST_GROUP_ID = "192.168.1.114";
-    private final InetAddress INET_ADDRESS;
+    private final String ipAddress;
+    private final String macAddress;
+    private final InetAddress inetAddress;
 
-    public Server() throws IOException {
-        INET_ADDRESS = InetAddress.getByName(MULTICAST_GROUP_ID);
+    public Server(String ipAddress, String macAddress) throws IOException {
+        this.ipAddress = ipAddress;
+        this.macAddress = macAddress;
+
+        inetAddress = InetAddress.getByName(ipAddress);
         connect();
         socket = new DatagramSocket();
     }
@@ -25,9 +33,11 @@ public class Server {
         for (Operation o : a.operations) {
             switch (o.getOperationType()) {
                 case SLEEP:
+                    LOG.debug("Sleeping");
                     sleep((SleepOperation) o);
                     break;
                 case SEND_PACKET:
+                    LOG.debug("Sending packet");
                     sendPacket((SendPacketOperation) o);
                     break;
                 default:
@@ -37,18 +47,19 @@ public class Server {
     }
 
     private void sendPacket(SendPacketOperation a) throws IOException {
-        System.out.println("UDP SEND: " + a.toString());
-        DatagramPacket packet = new DatagramPacket(a.bytes, a.bytes.length, INET_ADDRESS, PORT);
+        LOG.debug("UDP SEND={}", a.toString());
+        DatagramPacket packet = new DatagramPacket(a.bytes, a.bytes.length, inetAddress, PORT);
         socket.send(packet);
     }
 
     private void connect() throws IOException {
+        LOG.debug("Connecting to light server");
         try (DatagramSocket connectSocket = new DatagramSocket()) {
             final int connectPort = 48899;
             byte[] buf = "Link_Wi-Fi".getBytes();
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, INET_ADDRESS, connectPort);
 
-            System.out.println("UDP SEND: " + Arrays.toString(buf));
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, inetAddress, connectPort);
+            LOG.debug("UDP SEND={}", Arrays.toString(buf));
             connectSocket.send(packet);
 
             byte[] receiveData = new byte[32];
@@ -57,19 +68,19 @@ public class Server {
             boolean found = false;
             while (!found) {
                 connectSocket.receive(receivePacket);
-                String sentence = new String(receivePacket.getData(), 0,
-                        receivePacket.getLength());
-                System.out.println("UDP RECEIVED: " + sentence);
-                if ("192.168.1.114,ACCF233F9260,".equals(sentence)) {
+                String expectedSentence = ipAddress + "," + macAddress.toUpperCase().replace(":", "") + ",";
+                String sentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                LOG.debug("UDP RECEIVED={} EXPECTED={}", sentence, expectedSentence);
+                if (expectedSentence.equals(sentence)) {
                     found = true;
-                    System.out.println("UDP LINKED");
+                    LOG.debug("UDP LINKED");
                 }
             }
         }
     }
 
     private void sleep(SleepOperation sleepOperation) throws InterruptedException {
-        System.out.println("OP: "+sleepOperation.toString());
+        LOG.debug("OP: " + sleepOperation.toString());
         Thread.sleep(sleepOperation.sleepLengthMillis);
     }
 }
